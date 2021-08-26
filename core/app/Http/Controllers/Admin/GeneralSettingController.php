@@ -5,19 +5,17 @@ namespace App\Http\Controllers\Admin;
 use App\GeneralSetting;
 use App\Http\Controllers\Controller;
 use App\Package as AppPackage;
-use Facade\Ignition\Support\Packagist\Package;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Image;
-
+use App\Resources;
 class GeneralSettingController extends Controller
 {
     public function index()
     {
         $general    = GeneralSetting::first();
         $page_title = 'General Settings';
-
         $packages   = AppPackage::whereStatus(1)->get();
         return view('admin.setting.general_setting', compact('page_title', 'general', 'packages'));
     }
@@ -62,12 +60,15 @@ class GeneralSettingController extends Controller
         ]);
         if ($request->hasFile('logo')) {
             try {
-                $path = imagePath()['logoIcon']['path'];
-                if (!file_exists($path)) {
-                    mkdir($path, 0755, true);
-                }
-                Image::make($request->logo)->save($path . '/logo.png');
+                $admin = Auth::guard('admin')->user();
+                $filePath=awsS3upload($request->logo,'admin');
+                Resources::updateOrInsert(
+                    ['owner_id'=>$admin->id,'owner_type'=>$admin->name,'type'=>'logo']
+                    ,['path'=>$filePath])
+                    ;
+
             } catch (\Exception $exp) {
+                error_log($exp);
                 $notify[] = ['error', 'Logo could not be uploaded.'];
                 return back()->withNotify($notify);
             }

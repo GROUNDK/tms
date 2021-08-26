@@ -16,12 +16,12 @@
                                         <div class="avatar-preview">
 
                                             @php
-                                                $logo = getImage(imagePath()['ownerLogo']['path'].'/'.$owner->username.'.png');
+                                                $logo = getLogoImage('owner',);
                                                 $arr  = explode('/',$logo);
                                             @endphp
 
 
-                                            <div class="profilePicPreview logoPicPrev" style="background-size: 100%;background-image: url({{ getImage(imagePath()['ownerLogo']['path'].'/'.$owner->username.'.png') }})">
+                                            <div class="profilePicPreview logoPicPrev" style="background-size: 100%;background-image: url({{ $logo }})">
                                                 <button type="button" class="remove-image"><i class="fa fa-times"></i></button>
                                             </div>
 

@@ -2,11 +2,16 @@
 
 use App\Counter;
 use App\GeneralSetting;
+use App\Resources;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Auth;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+use Aws\S3\S3Client;
+use Aws\Exception\AwsException;
+use Aws\S3\ObjectUploader;
 
 function systemDetails()
 {
@@ -579,6 +584,18 @@ function imagePath()
     return $data;
 }
 
+function getLogoImage($userType){
+    $user=Auth::guard($userType)->user();
+
+    $result= Resources::where([
+        ['owner_id',$user->id],
+        ['owner_type',$userType],
+        ['type','logo']
+        ])->first();
+
+    return $result->path;
+}
+
 function diffForHumans($date)
 {
     $lang = session()->get('lang');
@@ -800,4 +817,46 @@ function getOwnerLogo($owner) {
     }else{
         return getImage($logo);
     }
+}
+
+function awsS3upload($file,$path){
+    $s3Client = new S3Client([
+        'profile' => 'default',
+        'region' => 'ap-northeast-2',
+        'version' => '2006-03-01'
+    ]);
+
+    $bucket = 'groundk';
+
+    // Using stream instead of file path
+    $source = fopen($file, 'rb');
+    $willUploadFileName = $path.'/'.substr(base64_encode(sha1(mt_rand())), 0, 10);
+    $uploader = new ObjectUploader(
+        $s3Client,
+        $bucket,
+        $willUploadFileName,
+        $source,
+        'public-read'
+    );
+
+    $_returnData = '';
+
+    do {
+        try {
+            $result = $uploader->upload();
+            if ($result["@metadata"]["statusCode"] == '200') {
+                $_returnData = $result["ObjectURL"];
+            }
+        } catch (MultipartUploadException $e) {
+            rewind($source);
+            $uploader = new MultipartUploader($s3Client, $source, [
+                'state' => $e->getState(),
+            ]);
+            $_returnData = 'error';
+        }
+    } while (!isset($result));
+
+    fclose($source);
+
+    return $_returnData;
 }

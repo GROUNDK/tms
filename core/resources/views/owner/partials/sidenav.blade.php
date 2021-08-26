@@ -6,7 +6,7 @@
         <div class="sidebar__logo">
             @php
                 $owner  = auth()->guard('owner')->user();
-                $logo   = getOwnerLogo($owner);
+                $logo   = getLogoImage('owner');
             @endphp
             <a href="{{route('owner.dashboard')}}" class="sidebar__main-logo">
                 <img src="{{ $logo }}" alt="@lang('image')">

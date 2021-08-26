@@ -6,6 +6,7 @@ use App\BookedTicket;
 use App\Feature;
 use App\Http\Controllers\Controller;
 use App\Package;
+use App\Resources;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -227,11 +228,12 @@ class OwnerController extends Controller
         $owner = $this->owner;
         if ($request->hasFile('logo')) {
             try {
-                $path = imagePath()['ownerLogo']['path'];
-                if (!file_exists($path)) {
-                    mkdir($path, 0755, true);
-                }
-                Image::make($request->logo)->save($path . "/$owner->username.png");
+                $admin = Auth::guard('owner')->user();
+                $filePath=awsS3upload($request->logo,'owner');
+                Resources::updateOrInsert(
+                    ['owner_id'=>$admin->id,'owner_type'=>'owner','type'=>'logo']
+                    ,['path'=>$filePath])
+                    ;
             } catch (\Exception $exp) {
                 $notify[] = ['error', 'Logo could not be uploaded.'];
                 return back()->withNotify($notify);

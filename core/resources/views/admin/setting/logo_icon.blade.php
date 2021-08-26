@@ -19,7 +19,7 @@
                                     <div class="thumb">
                                         <div class="avatar-preview">
 
-                                            <div class="profilePicPreview logoPicPrev" style="background-color: #000;background-size: 100%;background-image: url({{ getImage(imagePath()['logoIcon']['path'].'/logo.png', '?'.time()) }})">
+                                            <div class="profilePicPreview logoPicPrev" style="background-color: #000;background-size: 100%;background-image: url({{ getLogoImage('admin'), '?'.time() }})">
                                                 <button type="button" class="remove-image"><i class="fa fa-times"></i></button>
                                             </div>
                                         </div>
