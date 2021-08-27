@@ -3,6 +3,7 @@
 use App\Counter;
 use App\GeneralSetting;
 use App\Resources;
+use Aws\Credentials\CredentialProvider;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
@@ -13,6 +14,7 @@ use Aws\S3\S3Client;
 use Aws\Exception\MultipartUploadException;
 use Aws\S3\ObjectUploader;
 use Aws\S3\MultipartUploader;
+use Aws\Credentials\EcsCredentialProvider;
 
 function systemDetails()
 {
@@ -824,10 +826,15 @@ function getOwnerLogo($owner) {
 }
 
 function awsS3upload($file,$path){
+    // $path = '/Users/sunjung/.aws/credentials';
+    $path = '/home/ec2-user/.aws/credentials';
+    $provider = CredentialProvider::ini('default', $path);
+    $provider = CredentialProvider::memoize($provider);
+
     $s3Client = new S3Client([
-        'profile' => 'default',
         'region' => 'ap-northeast-2',
-        'version' => '2006-03-01'
+        'version' => '2006-03-01',
+        'credentials' => $provider
     ]);
 
     $bucket = 'groundk';
