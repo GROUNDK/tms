@@ -10,8 +10,9 @@ use Illuminate\Support\Facades\Auth;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 use Aws\S3\S3Client;
-use Aws\Exception\AwsException;
+use Aws\Exception\MultipartUploadException;
 use Aws\S3\ObjectUploader;
+use Aws\S3\MultipartUploader;
 
 function systemDetails()
 {
