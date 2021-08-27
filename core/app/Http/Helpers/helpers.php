@@ -585,7 +585,10 @@ function imagePath()
 }
 
 function getLogoImage($userType){
-    $user=Auth::guard($userType)->user();
+    if ($userType === 'Supper Admin')
+        $user=Auth::guard('admin')->user();
+    else
+        $user=Auth::guard($userType)->user();
 
     $result= Resources::where([
         ['owner_id',$user->id],
